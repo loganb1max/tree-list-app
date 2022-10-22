@@ -77,19 +77,27 @@ export const TreeList = forwardRef<TreeListRef, TreeListProps>(
 
     useEffect(() => {
       if (scrollTargetId) {
+        if (!containerRef.current) {
+          return;
+        }
+
         try {
-          const el: HTMLDivElement | null | undefined =
-            containerRef.current?.querySelector(`#${scrollTargetId}`);
+          const el: HTMLDivElement | null = containerRef.current?.querySelector(
+            `#${scrollTargetId}`
+          );
+          const halfContainerHeight = containerRef.current.clientHeight / 2;
 
           if (el) {
             containerRef.current?.scrollTo({
-              top: el.offsetTop,
+              top: el.offsetTop + halfContainerHeight,
               behavior: "smooth",
             });
           }
         } catch (err) {
           // ignore
         }
+
+        setScrollTargetId(null);
       }
     }, [scrollTargetId]);
 
@@ -156,13 +164,13 @@ export const TreeList = forwardRef<TreeListRef, TreeListProps>(
     const selectedPath = selectedId ? paths[selectedId] : [];
 
     return (
-      <div className="overflow-y-auto relative p-2" ref={containerRef}>
+      <div className="overflow-y-auto relative" ref={containerRef}>
         {flatted
           .filter((section) => shouldRenderChildren(section.id))
           .map((section) => {
             const isSelected =
-              selectedPath.includes(section.id) ||
-              openSections.includes(section.id);
+              selectedPath?.includes(section.id) ||
+              openSections?.includes(section.id);
             const level = paths[section.id].length - 1;
 
             return (
